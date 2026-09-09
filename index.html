@@ -53,8 +53,16 @@
   boutique = boutique.replace(/[^a-z0-9-]/g, '');
   var video = document.getElementById('menu');
   if (/[?&]fit=contain/i.test(qs)) { video.classList.add('contain'); }
+
+  // Rotation manuelle via URL (?rot=90 ou ?rot=270)
   var rot = qs.match(/[?&]rot=(90|270)/i);
-  if (rot) { video.classList.add('rot' + rot[1]); }
+  if (rot) {
+    video.classList.add('rot' + rot[1]);
+  }
+  // Auto-rotation pour République (portrait)
+  else if (boutique === 'republique') {
+    video.classList.add('rot90');
+  }
   var current = { url: null, tag: null };
   function safePlay() { try { var p = video.play(); if (p && p.catch) { p.catch(function () {}); } } catch (e) {} }
   function goFullscreen() {
