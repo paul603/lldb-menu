@@ -52,6 +52,38 @@
     opacity: 1;
   }
 
+  /* Badge de statut (dernière MAJ, erreur) */
+  .status-badge {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 999;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+
+  .status-badge.online {
+    background: rgba(52, 199, 89, 0.9);
+    color: white;
+  }
+
+  .status-badge.offline {
+    background: rgba(255, 59, 48, 0.9);
+    color: white;
+    opacity: 1;
+  }
+
+  .status-badge.warning {
+    background: rgba(255, 149, 0, 0.9);
+    color: white;
+    opacity: 1;
+  }
+
   /* Rotation pour République */
   body.rot90 #video-bg,
   body.rot90 #overlay {
@@ -69,6 +101,9 @@
 
 <!-- Overlay avec masques de produits -->
 <div id="overlay"></div>
+
+<!-- Badge de statut -->
+<div id="status-badge" class="status-badge online"></div>
 
 <script>
 (function () {
@@ -136,9 +171,32 @@
 
   var storeId = STORES[boutique];
 
+  // Validation boutique
+  if (!boutique || !storeId) {
+    console.error('Boutique non reconnue:', boutique);
+    updateStatus('warning', 'BOUTIQUE INCONNUE');
+    // Essayer de charger la vidéo par défaut quand même
+  }
+
   // Auto-rotation République
   if (boutique === 'republique') {
     document.body.classList.add('rot90');
+  }
+
+  // Fonction pour mettre à jour le badge de statut
+  function updateStatus(type, message) {
+    var badge = document.getElementById('status-badge');
+    if (!badge) return;
+
+    badge.className = 'status-badge ' + type;
+    badge.textContent = message;
+
+    // Auto-masquer après 10s si online
+    if (type === 'online') {
+      setTimeout(function() {
+        badge.style.opacity = '0.3';
+      }, 10000);
+    }
   }
 
   // Charger la vidéo
@@ -169,7 +227,10 @@
 
   // Charger le stock depuis Supabase
   function loadStock() {
-    if (!storeId) return;
+    if (!storeId) {
+      updateStatus('warning', 'BOUTIQUE NON CONFIGURÉE');
+      return;
+    }
 
     fetch(SUPABASE_URL + '/rest/v1/menu_items?select=name,id&is_active=eq.true', {
       headers: {
@@ -177,7 +238,10 @@
         'Authorization': 'Bearer ' + SUPABASE_KEY
       }
     })
-    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
     .then(function (items) {
       var itemIds = items.map(function (i) { return i.id; });
       var itemNames = {};
@@ -190,7 +254,10 @@
           'Authorization': 'Bearer ' + SUPABASE_KEY
         }
       })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
       .then(function (stock) {
         // Appliquer les masques
         var stockMap = {};
@@ -211,10 +278,16 @@
             }
           }
         });
+
+        // Mise à jour réussie
+        var now = new Date();
+        var timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        updateStatus('online', 'MAJ ' + timeStr);
       });
     })
     .catch(function (err) {
       console.error('Erreur chargement stock:', err);
+      updateStatus('offline', 'HORS LIGNE');
     });
   }
 
