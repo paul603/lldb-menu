@@ -118,44 +118,44 @@
     nantes: 'fe107d26-9d1b-4b0a-b037-1d3bbd19bc12'
   };
 
-  // Positions des produits sur la vidéo (en % de la largeur/hauteur)
-  // Calibré sur la vraie vidéo LLDB
+  // Positions des produits sur la vidéo (en % viewport après rotation)
+  // Layout horizontal : 4 bandes (Petits Prix, Classiques, Primées, Résines)
   var PRODUCT_POSITIONS = {
-    // LES PETITS PRIX (top ~8-28%)
-    'DIRTY BERRY': { top: 8.5, left: 45, width: 20, height: 3.5 },
-    'CRITICAL': { top: 12.5, left: 45, width: 20, height: 3.5 },
-    'CHEESE': { top: 16.5, left: 45, width: 20, height: 3.5 },
-    'BUBBLE': { top: 20.5, left: 45, width: 20, height: 3.5 },
-    'PURPLE HAZE': { top: 24.5, left: 45, width: 20, height: 3.5 },
+    // BANDE 1 - LES PETITS PRIX (ligne du haut, ~12% height)
+    'DIRTY BERRY': { top: 15, left: 18, width: 10, height: 8 },
+    'CRITICAL': { top: 15, left: 29, width: 10, height: 8 },
+    'CHEESE': { top: 15, left: 40, width: 10, height: 8 },
+    'BUBBLE': { top: 15, left: 51, width: 10, height: 8 },
+    'PURPLE HAZE': { top: 15, left: 62, width: 10, height: 8 },
 
-    // LES CLASSIQUES (top ~32-52%)
-    'BLUE ZUSHI': { top: 32, left: 45, width: 20, height: 3.5 },
-    'LOUISE OG': { top: 36, left: 45, width: 20, height: 3.5 },
-    'WEDDING CAKE': { top: 40, left: 45, width: 20, height: 3.5 },
-    'RAINBOW RUNTZ V2': { top: 44, left: 45, width: 20, height: 3.5 },
-    'SUPER SKUNK': { top: 48, left: 45, width: 20, height: 3.5 },
-    'NORTHERN LIGHTS': { top: 52, left: 45, width: 20, height: 3.5 },
+    // BANDE 2 - LES CLASSIQUES (~35% height)
+    'BLUE ZUSHI': { top: 35, left: 10, width: 11, height: 8 },
+    'LOUISE OG': { top: 35, left: 22, width: 11, height: 8 },
+    'WEDDING CAKE': { top: 35, left: 34, width: 11, height: 8 },
+    'RAINBOW RUNTZ V2': { top: 35, left: 46, width: 11, height: 8 },
+    'SUPER SKUNK': { top: 35, left: 58, width: 11, height: 8 },
+    'NORTHERN LIGHTS': { top: 35, left: 70, width: 11, height: 8 },
 
-    // LES PRIMEES (top ~56-72%)
-    'PINEAPLI': { top: 56.5, left: 45, width: 20, height: 3.5 },
-    'AMNESIA HYDRO': { top: 60.5, left: 45, width: 20, height: 3.5 },
-    'GELATO': { top: 64.5, left: 45, width: 20, height: 3.5 },
-    'FIRE OG GOD': { top: 68.5, left: 45, width: 20, height: 3.5 },
-    'MELA SOUR': { top: 72.5, left: 45, width: 20, height: 3.5 },
+    // BANDE 3 - LES PRIMEES (~58% height)
+    'PINEAPLI': { top: 58, left: 15, width: 12, height: 8 },
+    'AMNESIA HYDRO': { top: 58, left: 28, width: 12, height: 8 },
+    'GELATO': { top: 58, left: 41, width: 12, height: 8 },
+    'FIRE OG GOD': { top: 58, left: 54, width: 12, height: 8 },
+    'MELA SOUR': { top: 58, left: 67, width: 12, height: 8 },
 
-    // LES RESINES (top ~76-95%, plus compactes)
-    'GORILLA PRO': { top: 76, left: 45, width: 20, height: 2.8 },
-    'DOUBLE SOUR LA': { top: 79, left: 45, width: 20, height: 2.8 },
-    'NEW AFGHAN V3': { top: 82, left: 45, width: 20, height: 2.8 },
-    'X FILTREY 30U': { top: 85, left: 45, width: 20, height: 2.8 },
-    'ALCHIMIA': { top: 88, left: 45, width: 20, height: 2.8 },
-    'OUNAS EDDIN CALIFO': { top: 91, left: 45, width: 20, height: 2.8 },
-    'DAYARA': { top: 94, left: 45, width: 20, height: 2.8 },
-    'ICE ISOLATOR': { top: 76, left: 68, width: 20, height: 2.8 },
-    'BANANA YELLOW': { top: 79, left: 68, width: 20, height: 2.8 },
-    'ICE O LATOR': { top: 82, left: 68, width: 20, height: 2.8 },
-    'LEMON HAZE': { top: 85, left: 68, width: 20, height: 2.8 },
-    'HI CRISTAL': { top: 88, left: 68, width: 20, height: 2.8 }
+    // BANDE 4 - LES RESINES (2 lignes, ~78% et ~88% height)
+    'GORILLA PRO': { top: 78, left: 8, width: 9, height: 6 },
+    'DOUBLE SOUR LA': { top: 78, left: 18, width: 9, height: 6 },
+    'NEW AFGHAN V3': { top: 78, left: 28, width: 9, height: 6 },
+    'X FILTREY 30U': { top: 78, left: 38, width: 9, height: 6 },
+    'ALCHIMIA': { top: 78, left: 48, width: 9, height: 6 },
+    'OUNAS EDDIN CALIFO': { top: 78, left: 58, width: 9, height: 6 },
+    'DAYARA': { top: 78, left: 68, width: 9, height: 6 },
+    'ICE ISOLATOR': { top: 88, left: 13, width: 9, height: 6 },
+    'BANANA YELLOW': { top: 88, left: 23, width: 9, height: 6 },
+    'ICE O LATOR': { top: 88, left: 33, width: 9, height: 6 },
+    'LEMON HAZE': { top: 88, left: 43, width: 9, height: 6 },
+    'HI CRISTAL': { top: 88, left: 53, width: 9, height: 6 }
   };
 
   // Détection boutique
