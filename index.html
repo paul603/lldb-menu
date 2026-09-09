@@ -5,9 +5,30 @@
 <title>Menu — Le Lab du Bonheur</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
-  video { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; background: #000; }
-  video.rot90, video.rot270 { top: 50%; left: 50%; width: 100vh; height: 100vw; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+  video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: fill; /* Étire la vidéo pour remplir tout l'écran sans bandes noires */
+    background: #000;
+  }
+  video.contain { object-fit: contain; } /* Pour ?fit=contain dans l'URL */
+  video.rot90, video.rot270 {
+    top: 50%;
+    left: 50%;
+    width: 100vh;
+    height: 100vw;
+  }
   video.rot90  { transform: translate(-50%, -50%) rotate(90deg); }
   video.rot270 { transform: translate(-50%, -50%) rotate(-90deg); }
 </style>
@@ -16,7 +37,7 @@
 <video id="menu" autoplay muted loop playsinline></video>
 <script>
 (function () {
-  var BASE = '/videos/';
+  var BASE = 'https://lhcnjulgrgsanmvvttjz.supabase.co/storage/v1/object/public/menu-tv/';
   var CHECK_INTERVAL = 180000;
   var qs = window.location.search;
   var boutique = '';
@@ -31,9 +52,9 @@
   }
   boutique = boutique.replace(/[^a-z0-9-]/g, '');
   var video = document.getElementById('menu');
-  if (/[?&]fit=contain/i.test(qs)) { video.style.objectFit = 'contain'; }
+  if (/[?&]fit=contain/i.test(qs)) { video.classList.add('contain'); }
   var rot = qs.match(/[?&]rot=(90|270)/i);
-  if (rot) { video.className = 'rot' + rot[1]; }
+  if (rot) { video.classList.add('rot' + rot[1]); }
   var current = { url: null, tag: null };
   function safePlay() { try { var p = video.play(); if (p && p.catch) { p.catch(function () {}); } } catch (e) {} }
   function goFullscreen() {
