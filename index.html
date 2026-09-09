@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Menu — Le Lab du Bonheur</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+  video { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; background: #000; }
+  video.rot90, video.rot270 { top: 50%; left: 50%; width: 100vh; height: 100vw; }
+  video.rot90  { transform: translate(-50%, -50%) rotate(90deg); }
+  video.rot270 { transform: translate(-50%, -50%) rotate(-90deg); }
+</style>
+</head>
+<body>
+<video id="menu" autoplay muted loop playsinline></video>
+<script>
+(function () {
+  var BASE = '/videos/';
+  var CHECK_INTERVAL = 180000;
+  var qs = window.location.search;
+  var boutique = '';
+  var m = qs.match(/[?&]b=([a-z0-9-]+)/i);
+  if (m) { boutique = m[1].toLowerCase(); }
+  else {
+    var segs = window.location.pathname.split('/').filter(function (s) { return s.length > 0; });
+    if (segs.length) {
+      var last = segs[segs.length - 1].toLowerCase().replace(/\.html?$/, '');
+      if (last && last !== 'menu-tv' && last !== 'index') { boutique = last; }
+    }
+  }
+  boutique = boutique.replace(/[^a-z0-9-]/g, '');
+  var video = document.getElementById('menu');
+  if (/[?&]fit=contain/i.test(qs)) { video.style.objectFit = 'contain'; }
+  var rot = qs.match(/[?&]rot=(90|270)/i);
+  if (rot) { video.className = 'rot' + rot[1]; }
+  var current = { url: null, tag: null };
+  function safePlay() { try { var p = video.play(); if (p && p.catch) { p.catch(function () {}); } } catch (e) {} }
+  function goFullscreen() {
+    var el = document.documentElement;
+    try {
+      if (el.requestFullscreen) { el.requestFullscreen(); }
+      else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+      else if (video.webkitEnterFullscreen) { video.webkitEnterFullscreen(); }
+    } catch (e) {}
+    safePlay();
+  }
+  document.addEventListener('click', goFullscreen);
+  document.addEventListener('keydown', function (e) { var k = e.keyCode; if (k === 13 || k === 32 || k === 415) { goFullscreen(); } });
+  if (!window.fetch) {
+    var fallbackUrl = boutique ? BASE + 'menu-' + boutique + '.mp4' : BASE + 'menu.mp4';
+    video.src = fallbackUrl + '?v=' + Date.now();
+    video.onerror = function () { video.src = BASE + 'menu.mp4?v=' + Date.now(); safePlay(); };
+    safePlay();
+    setInterval(function () { window.location.reload(); }, 1800000);
+    return;
+  }
+  function head(url, cb) {
+    fetch(url, { method: 'HEAD', cache: 'no-store' }).then(function (r) {
+      if (r.ok) { cb({ ok: true, tag: r.headers.get('etag') || r.headers.get('last-modified') || '' }); }
+      else { cb({ ok: false }); }
+    }).catch(function () { cb({ ok: false }); });
+  }
+  function resolveVideo(cb) {
+    if (boutique) {
+      var overrideUrl = BASE + 'menu-' + boutique + '.mp4';
+      head(overrideUrl, function (res) {
+        if (res.ok) { cb(overrideUrl, res.tag); }
+        else { head(BASE + 'menu.mp4', function (r2) { cb(BASE + 'menu.mp4', r2.ok ? r2.tag : ''); }); }
+      });
+    } else {
+      head(BASE + 'menu.mp4', function (r) { cb(BASE + 'menu.mp4', r.ok ? r.tag : ''); });
+    }
+  }
+  function apply(url, tag) {
+    if (url === current.url && tag === current.tag) { return; }
+    current = { url: url, tag: tag };
+    video.src = url + '?v=' + encodeURIComponent(tag || String(Date.now()));
+    video.load();
+    safePlay();
+  }
+  resolveVideo(apply);
+  setInterval(function () { resolveVideo(apply); }, CHECK_INTERVAL);
+  video.addEventListener('pause', function () { setTimeout(safePlay, 2000); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { safePlay(); } });
+})();
+</script>
+</body>
+</html>

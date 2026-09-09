@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Menu — Le Lab du Bonheur</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#243f2b; --cream:#f5edd2; --yellow:#f3d36b; --red:#c0392b; --star:#f0b429; }
+  * { box-sizing: border-box; }
+  html { font-size: 0.82vw; }
+  @media (orientation: portrait) { html { font-size: 1.45vw; } }
+  html, body { margin:0; padding:0; width:100%; height:100%; background: var(--bg); overflow:hidden;
+    font-family: 'Trebuchet MS', 'Segoe UI', Verdana, sans-serif; color: var(--cream); }
+  body.rot90, body.rot270 { position: fixed; top:50%; left:50%; width:100vh; height:100vw; overflow:hidden; }
+  body.rot90  { transform: translate(-50%,-50%) rotate(90deg); }
+  body.rot270 { transform: translate(-50%,-50%) rotate(-90deg); }
+  #wrap { display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem; padding:1.4rem 1.6rem; height:100%; align-content:start; }
+  @media (orientation: portrait) { #wrap { grid-template-columns: 1fr; overflow:hidden; } }
+  .col { display:flex; flex-direction:column; gap:1.2rem; min-width:0; }
+  .card { border:0.32rem dotted var(--cream); border-radius:1.6rem; padding:1rem 1.2rem 1.1rem; position:relative; }
+  .badge { display:inline-block; background:var(--yellow); color:var(--red); font-weight:800; letter-spacing:0.05em;
+    padding:0.35rem 1rem; border-radius:0.5rem; font-size:1.5rem; text-transform:uppercase; margin:-2.4rem 0 0.6rem 0.4rem;
+    box-shadow:0 0.15rem 0 rgba(0,0,0,.25); }
+  table { width:100%; border-collapse:collapse; }
+  th { font-size:1.35rem; color:var(--cream); text-align:right; padding:0 0.3rem 0.4rem; font-weight:800; }
+  th.name { text-align:left; }
+  td { padding:0.32rem 0.3rem; font-size:1.3rem; font-weight:700; text-align:right; white-space:nowrap; }
+  td.name { text-align:left; white-space:normal; }
+  .pname { font-weight:800; text-transform:uppercase; font-size:1.32rem; letter-spacing:0.02em; }
+  .stars { color:var(--star); font-size:1.05rem; letter-spacing:0.12em; line-height:1; }
+  .flag { margin-right:0.35rem; }
+  .small-cards { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+  .note { text-align:center; font-weight:800; font-size:1.3rem; padding:0.2rem 0; }
+  #hdr { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; padding:0 0.4rem; }
+  #hdr .title { font-size:2rem; font-weight:900; letter-spacing:0.06em; }
+  #hdr .tag { background:#9fb87a; color:#243f2b; font-weight:800; padding:0.3rem 0.9rem; border-radius:0.5rem; font-size:1.3rem; }
+  #empty { grid-column:1/-1; text-align:center; font-size:2rem; padding-top:20vh; opacity:0.8; }
+</style>
+</head>
+<body>
+<div id="wrap"></div>
+<script>
+(function () {
+  var SB = 'https://ljcixbsebbwvbkkohfxq.supabase.co';
+  var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqY2l4YnNlYmJ3dmJra29oZnhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDQyNDgsImV4cCI6MjA3MTEyMDI0OH0.jJ_mZI383CcA2h5uNbIRFqsycPZoGqIVVgbS8hHrEKc';
+  var STORES = {
+    republique: 'b5be6a9d-4c3d-4dc7-9c8c-b85df7385176',
+    asnieres:   'ebc6c057-765b-4972-b7ae-d67a62eb2729',
+    odeon:      '6cb8093b-4290-4414-89c2-8132273dac73',
+    nantes:     'fe107d26-9d1b-4b0a-b037-1d3bbd19bc12'
+  };
+  var LABELS = { republique:'R\u00e9publique', asnieres:'Asni\u00e8res', odeon:'Od\u00e9on', nantes:'Nantes' };
+  var FLAGS = { fr:'\ud83c\uddeb\ud83c\uddf7', it:'\ud83c\uddee\ud83c\uddf9', es:'\ud83c\uddea\ud83c\uddf8', ch:'\ud83c\udde8\ud83c\udded', us:'\ud83c\uddfa\ud83c\uddf8', ma:'\ud83c\uddf2\ud83c\udde6' };
+  var CATS = [
+    { key:'petits-prix', label:'Les Petits Prix', col:0 },
+    { key:'classiques',  label:'Les Classiques',  col:0 },
+    { key:'primees',     label:'Les Prim\u00e9es', col:1 },
+    { key:'resines',     label:'Les R\u00e9sines', col:1 }
+  ];
+  var qs = window.location.search;
+  var slug = '';
+  var m = qs.match(/[?&]b=([a-z0-9-]+)/i);
+  if (m) { slug = m[1].toLowerCase(); }
+  else {
+    var segs = window.location.pathname.split('/').filter(function (s) { return s.length > 0; });
+    var last = segs.length ? segs[segs.length - 1].toLowerCase().replace(/\.html?$/, '') : '';
+    if (STORES[last]) { slug = last; }
+  }
+  var rot = qs.match(/[?&]rot=(90|270)/i);
+  if (rot) { document.body.className = 'rot' + rot[1]; }
+
+  function goFullscreen() {
+    var el = document.documentElement;
+    try {
+      if (el.requestFullscreen) { el.requestFullscreen(); }
+      else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+    } catch (e) {}
+  }
+  document.addEventListener('click', goFullscreen);
+  document.addEventListener('keydown', function (e) { var k = e.keyCode; if (k === 13 || k === 32) { goFullscreen(); } });
+
+  var lastJson = '';
+  function fetchJson(url) {
+    return fetch(url, { headers: { apikey: KEY, Authorization: 'Bearer ' + KEY }, cache: 'no-store' })
+      .then(function (r) { return r.json(); });
+  }
+  function load() {
+    var pItems = fetchJson(SB + '/rest/v1/menu_items?is_active=eq.true&order=sort_order.asc&select=*');
+    var pStock = slug ? fetchJson(SB + '/rest/v1/menu_stock?store_id=eq.' + STORES[slug] + '&select=item_id,in_stock') : Promise.resolve([]);
+    Promise.all([pItems, pStock]).then(function (res) {
+      var j = JSON.stringify(res);
+      if (j === lastJson) { return; }
+      lastJson = j;
+      render(res[0], res[1]);
+    }).catch(function () {});
+  }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+  function euro(v) { return v == null ? '\u2014' : (Math.round(v) == v ? Math.round(v) : v) + '\u20ac'; }
+  function stars(n) { var s = ''; for (var i = 0; i < (n || 0); i++) { s += '\u2605'; } return s; }
+
+  function render(items, stock) {
+    var out = {};
+    stock.forEach(function (r) { out[r.item_id] = r.in_stock; });
+    function visible(it) { return slug ? out[it.id] !== false : true; }
+    var wrap = document.getElementById('wrap');
+    var cols = [[], []];
+    CATS.forEach(function (cat) {
+      var rows = items.filter(function (it) { return it.category === cat.key && visible(it); });
+      if (!rows.length) { return; }
+      var h = '<div class="card"><div class="badge">' + esc(cat.label) + '</div><table>';
+      h += '<tr><th class="name"></th><th>1G</th><th>3G</th><th>5G</th><th>10G</th><th>25G</th></tr>';
+      rows.forEach(function (it) {
+        h += '<tr><td class="name"><span class="pname"><span class="flag">' + (FLAGS[it.country] || '') + '</span>' + esc(it.name) + ' ' + esc(it.emoji || '') + '</span><br><span class="stars">' + stars(it.rating) + '</span></td>';
+        h += '<td>' + euro(it.price_1g) + '</td><td>' + euro(it.price_3g) + '</td><td>' + euro(it.price_5g) + '</td><td>' + euro(it.price_10g) + '</td><td>' + euro(it.price_25g) + '</td></tr>';
+      });
+      h += '</table></div>';
+      cols[cat.col].push(h);
+    });
+    // Pop & Mix
+    var smalls = '';
+    ['pop', 'mix'].forEach(function (k) {
+      var rows = items.filter(function (it) { return it.category === k && visible(it); });
+      if (!rows.length) { return; }
+      smalls += '<div class="card"><div class="badge">' + (k === 'pop' ? 'Pop \ud83c\udf7f' : 'Les Mix \u26f0\ufe0f') + '</div>';
+      rows.forEach(function (it) { smalls += '<div class="note">' + esc(it.name) + ' ' + esc(it.price_note || '') + '</div>'; });
+      smalls += '</div>';
+    });
+    if (smalls) { cols[0].push('<div class="small-cards">' + smalls + '</div>'); }
+    var hdr = '<div id="hdr"><div class="title">\ud83c\udf3f Le Lab du Bonheur \u2014 Menu 2026</div>' + (slug ? '<div class="tag">' + esc(LABELS[slug]) + '</div>' : '') + '</div>';
+    var body = cols[0].length || cols[1].length
+      ? '<div class="col">' + cols[0].join('') + '</div><div class="col">' + cols[1].join('') + '</div>'
+      : '<div id="empty">Menu en cours de mise \u00e0 jour\u2026</div>';
+    wrap.innerHTML = hdr + body;
+  }
+
+  load();
+  setInterval(load, 60000);
+})();
+</script>
+</body>
+</html>

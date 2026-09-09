@@ -1,0 +1,12 @@
+# Videos - trop lourds pour Git/Vercel (hébergés sur Supabase Storage)
+videos/*.mp4
+
+# Node modules
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
