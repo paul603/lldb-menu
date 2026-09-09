@@ -1,12 +1,17 @@
-# Videos - trop lourds pour Git/Vercel (hébergés sur Supabase Storage)
+# Videos - hébergées sur Vercel Blob Storage (CDN)
 videos/*.mp4
 
 # Node modules
 node_modules/
+package-lock.json
 
 # OS
 .DS_Store
 Thumbs.db
 
 # Vercel
+.vercel
+.env
+.env.local
+
 .vercel

@@ -1,0 +1,9 @@
+# Ne pas ignorer les vidéos - elles sont servies statiquement
+# Les vidéos sont dans /videos/ et seront accessibles via /videos/menu-*.mp4
+
+node_modules
+.git
+*.md
+upload-*.js
+package.json
+package-lock.json

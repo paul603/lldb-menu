@@ -1,0 +1,24 @@
+{
+  "name": "lldb-menu",
+  "version": "1.0.0",
+  "description": "Site statique déployé sur Vercel (projet `lldb-menu`, équipe « baba's projects »). URL de production : https://lldb-menu.vercel.app",
+  "main": "upload-videos.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paul603/lldb-menu.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/paul603/lldb-menu/issues"
+  },
+  "homepage": "https://github.com/paul603/lldb-menu#readme",
+  "dependencies": {
+    "@vercel/blob": "^2.8.0"
+  }
+}
