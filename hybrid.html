@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Menu Hybride — Le Lab du Bonheur</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+
+  /* Vidéo en fond */
+  #video-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: fill;
+    z-index: 1;
+  }
+
+  /* Overlay transparent par-dessus */
+  #overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Masque pour produits en rupture */
+  .product-mask {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #FF0000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FF0000;
+    font-family: 'Trebuchet MS', sans-serif;
+    font-weight: 900;
+    font-size: 1.8vw;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .product-mask.out-of-stock {
+    opacity: 1;
+  }
+
+  /* Rotation pour République */
+  body.rot90 #video-bg,
+  body.rot90 #overlay {
+    top: 50%;
+    left: 50%;
+    width: 100vh;
+    height: 100vw;
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+</style>
+</head>
+<body>
+<!-- Vidéo de fond -->
+<video id="video-bg" autoplay muted loop playsinline></video>
+
+<!-- Overlay avec masques de produits -->
+<div id="overlay"></div>
+
+<script>
+(function () {
+  var BASE = '/videos/';
+  var SUPABASE_URL = 'https://ljcixbsebbwvbkkohfxq.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqY2l4YnNlYmJ3dmJra29oZnhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NDQyNDgsImV4cCI6MjA3MTEyMDI0OH0.jJ_mZI383CcA2h5uNbIRFqsycPZoGqIVVgbS8hHrEKc';
+
+  var STORES = {
+    republique: 'b5be6a9d-4c3d-4dc7-9c8c-b85df7385176',
+    asnieres: 'ebc6c057-765b-4972-b7ae-d67a62eb2729',
+    odeon: '6cb8093b-4290-4414-89c2-8132273dac73',
+    nantes: 'fe107d26-9d1b-4b0a-b037-1d3bbd19bc12'
+  };
+
+  // Positions approximatives des produits sur la vidéo (en % de la largeur/hauteur)
+  // À AJUSTER selon votre vidéo exacte
+  var PRODUCT_POSITIONS = {
+    // Petits Prix (colonne gauche)
+    'DIRTY BERRY': { top: 12, left: 28, width: 16, height: 4 },
+    'CRITICAL': { top: 17, left: 28, width: 16, height: 4 },
+    'CHEESE': { top: 22, left: 28, width: 16, height: 4 },
+    'BUBBLE': { top: 27, left: 28, width: 16, height: 4 },
+    'PURPLE HAZE': { top: 32, left: 28, width: 16, height: 4 },
+
+    // Classiques (colonne gauche bas)
+    'BLUE ZUSHI V2': { top: 43, left: 28, width: 16, height: 4 },
+    'LOUISE ATAK': { top: 48, left: 28, width: 16, height: 4 },
+    'WEDDING CAKE': { top: 53, left: 28, width: 16, height: 4 },
+    'RAINBOW RUNTZ V2': { top: 58, left: 28, width: 16, height: 4 },
+    'MASTER KUSH': { top: 63, left: 28, width: 16, height: 4 },
+    'NORTHERN LIGHTS': { top: 68, left: 28, width: 16, height: 4 },
+
+    // Primées (colonne droite haut)
+    'PINEAPPLE': { top: 12, left: 67, width: 16, height: 4 },
+    'AMNESIA HYDRO': { top: 17, left: 67, width: 16, height: 4 },
+    'TROPICAL': { top: 22, left: 67, width: 16, height: 4 },
+    'FIRE OF GOD': { top: 27, left: 67, width: 16, height: 4 },
+    'MELA SOUR': { top: 32, left: 67, width: 16, height: 4 },
+
+    // Résines (colonne droite bas)
+    'DOUBLE ZERO': { top: 43, left: 67, width: 16, height: 3.5 },
+    'MOUSSE CALI I.A.': { top: 47, left: 67, width: 16, height: 3.5 },
+    'NEW AFGHAN V3': { top: 51, left: 67, width: 16, height: 3.5 },
+    'X3 FILTRE 120U': { top: 55, left: 67, width: 16, height: 3.5 },
+    'ATOMIQUE': { top: 59, left: 67, width: 16, height: 3.5 },
+    'OUNAS EDDIN CALIPO': { top: 63, left: 67, width: 16, height: 3.5 },
+    'BAB BERRED': { top: 67, left: 67, width: 16, height: 3.5 },
+    'DRY SIFT by LLDB': { top: 71, left: 67, width: 16, height: 3.5 },
+    'ICE O LATOR': { top: 75, left: 67, width: 16, height: 3.5 },
+    'FROZEN PAPAYA OU OG KUSH': { top: 79, left: 67, width: 16, height: 3.5 }
+  };
+
+  // Détection boutique
+  var qs = window.location.search;
+  var boutique = '';
+  var m = qs.match(/[?&]b=([a-z0-9-]+)/i);
+  if (m) {
+    boutique = m[1].toLowerCase();
+  } else {
+    var segs = window.location.pathname.split('/').filter(function (s) { return s.length > 0; });
+    var last = segs.length ? segs[segs.length - 1].toLowerCase().replace(/\.html?$/, '') : '';
+    if (last && STORES[last]) {boutique = last;
+    }
+  }
+
+  var storeId = STORES[boutique];
+
+  // Auto-rotation République
+  if (boutique === 'republique') {
+    document.body.classList.add('rot90');
+  }
+
+  // Charger la vidéo
+  var video = document.getElementById('video-bg');
+  video.src = BASE + 'menu-' + boutique + '.mp4';
+  video.onerror = function () {
+    video.src = BASE + 'menu.mp4';
+  };
+
+  // Créer les masques de produits
+  function createProductMasks() {
+    var overlay = document.getElementById('overlay');
+    overlay.innerHTML = '';
+
+    for (var productName in PRODUCT_POSITIONS) {
+      var pos = PRODUCT_POSITIONS[productName];
+      var mask = document.createElement('div');
+      mask.className = 'product-mask';
+      mask.dataset.product = productName;
+      mask.style.top = pos.top + '%';
+      mask.style.left = pos.left + '%';
+      mask.style.width = pos.width + '%';
+      mask.style.height = pos.height + '%';
+      mask.textContent = 'RUPTURE';
+      overlay.appendChild(mask);
+    }
+  }
+
+  // Charger le stock depuis Supabase
+  function loadStock() {
+    if (!storeId) return;
+
+    fetch(SUPABASE_URL + '/rest/v1/menu_items?select=name,id&is_active=eq.true', {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      }
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (items) {
+      var itemIds = items.map(function (i) { return i.id; });
+      var itemNames = {};
+      items.forEach(function (i) { itemNames[i.id] = i.name; });
+
+      // Charger le stock
+      return fetch(SUPABASE_URL + '/rest/v1/menu_stock?select=item_id,in_stock&store_id=eq.' + storeId, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY
+        }
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (stock) {
+        // Appliquer les masques
+        var stockMap = {};
+        stock.forEach(function (s) {
+          stockMap[s.item_id] = s.in_stock;
+        });
+
+        document.querySelectorAll('.product-mask').forEach(function (mask) {
+          var productName = mask.dataset.product;
+          var item = items.find(function (i) { return i.name === productName; });
+
+          if (item) {
+            var inStock = stockMap[item.id];
+            if (inStock === false) {
+              mask.classList.add('out-of-stock');
+            } else {
+              mask.classList.remove('out-of-stock');
+            }
+          }
+        });
+      });
+    })
+    .catch(function (err) {
+      console.error('Erreur chargement stock:', err);
+    });
+  }
+
+  // Init
+  createProductMasks();
+  loadStock();
+
+  // Refresh toutes les 60s
+  setInterval(loadStock, 60000);
+
+  // Plein écran
+  document.addEventListener('click', function () {
+    var el = document.documentElement;
+    if (el.requestFullscreen) { el.requestFullscreen(); }
+    else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+  });
+})();
+</script>
+</body>
+</html>
