@@ -127,56 +127,47 @@
     nantes: 'fe107d26-9d1b-4b0a-b037-1d3bbd19bc12'
   };
 
-  // Positions des produits sur la vidéo MENU 2026 (1920x1080 paysage).
-  // Coordonnees en % de la zone video 16:9, mesurees sur le rendu de reference.
+  // Positions des produits sur la video MENU 2026 (1920x1080 paysage).
+  // Coordonnees MESUREES au pixel sur une frame reelle du .mp4 : detection
+  // des pixels blancs du texte, puis conversion en % de la zone video 16:9.
+  // Colonne des noms mesuree a x=571..770 (gauche) et x=1256..1455 (droite),
+  // les prix commencent a x=865 / x=1524 et restent donc hors masque.
   // Toutes les boutiques diffusent la meme video ; Republique est seulement
   // pivotee de 90deg par CSS, overlay compris, donc un seul jeu suffit.
-  //
-  // Mesures de reference (largeur 1920, hauteur 1080) :
-  //   colonne gauche : noms de x=585 a x=800   -> left 30.5%, width 11.5%
-  //   colonne droite : noms de x=1235 a x=1450 -> left 64.3%, width 11.5%
-  //   lignes petits prix   : y=105,157,208,259,311
-  //   lignes classiques    : y=458,508,558,608,659,710
-  //   lignes primees       : y=108,158,208,259,310
-  //   lignes resines       : y=457,507,554,602,651,699,746,794,842,890
-  var COL_L = 30.5, COL_R = 64.3, COL_W = 11.5, ROW_H = 3.6;
-
-  function row(y) { return (y / 1080) * 100 - ROW_H / 2; }
-
   var PRODUCT_POSITIONS = {
-    // LES PETITS PRIX (colonne gauche, haut)
-    'DIRTY BERRY':        { top: row(105), left: COL_L, width: COL_W, height: ROW_H },
-    'CRITICAL':           { top: row(157), left: COL_L, width: COL_W, height: ROW_H },
-    'CHEESE':             { top: row(208), left: COL_L, width: COL_W, height: ROW_H },
-    'BUBBLE':             { top: row(259), left: COL_L, width: COL_W, height: ROW_H },
-    'PURPLE HAZE':        { top: row(311), left: COL_L, width: COL_W, height: ROW_H },
+    // LES PETITS PRIX
+    'DIRTY BERRY':               { top:  9.167, left: 29.427, width: 11.719, height: 3.148 },
+    'CRITICAL':                  { top: 14.167, left: 29.427, width: 11.719, height: 3.148 },
+    'CHEESE':                    { top: 19.074, left: 29.427, width: 11.719, height: 3.148 },
+    'BUBBLE':                    { top: 24.028, left: 29.427, width: 11.719, height: 3.148 },
+    'PURPLE HAZE':               { top: 29.028, left: 29.427, width: 11.719, height: 3.148 },
 
-    // LES CLASSIQUES (colonne gauche, bas)
-    'BLUE ZUSHI V2':      { top: row(458), left: COL_L, width: COL_W, height: ROW_H },
-    'LOUISE ATAK':        { top: row(508), left: COL_L, width: COL_W, height: ROW_H },
-    'WEDDING CAKE':       { top: row(558), left: COL_L, width: COL_W, height: ROW_H },
-    'RAINBOW RUNTZ V2':   { top: row(608), left: COL_L, width: COL_W, height: ROW_H },
-    'MASTER KUSH':        { top: row(659), left: COL_L, width: COL_W, height: ROW_H },
-    'NORTHERN LIGHTS':    { top: row(710), left: COL_L, width: COL_W, height: ROW_H },
+    // LES CLASSIQUES
+    'BLUE ZUSHI V2':             { top: 43.194, left: 29.427, width: 11.719, height: 3.148 },
+    'LOUISE ATAK':               { top: 48.102, left: 29.427, width: 11.719, height: 3.148 },
+    'WEDDING CAKE':              { top: 53.009, left: 29.427, width: 11.719, height: 3.148 },
+    'RAINBOW RUNTZ V2':          { top: 57.917, left: 29.427, width: 11.719, height: 3.148 },
+    'MASTER KUSH':               { top: 62.824, left: 29.427, width: 11.719, height: 3.148 },
+    'NORTHERN LIGHTS':           { top: 67.731, left: 29.427, width: 11.719, height: 3.148 },
 
-    // LES PRIMEES (colonne droite, haut)
-    'PINEAPPLE':          { top: row(108), left: COL_R, width: COL_W, height: ROW_H },
-    'AMNESIA HYDRO':      { top: row(158), left: COL_R, width: COL_W, height: ROW_H },
-    'TROPICAL':           { top: row(208), left: COL_R, width: COL_W, height: ROW_H },
-    'FIRE OF GOD':        { top: row(259), left: COL_R, width: COL_W, height: ROW_H },
-    'MELA SOUR':          { top: row(310), left: COL_R, width: COL_W, height: ROW_H },
+    // LES PRIMEES
+    'PINEAPPLE':                 { top:  9.352, left: 65.104, width: 11.198, height: 3.148 },
+    'AMNESIA HYDRO':             { top: 14.259, left: 65.104, width: 11.198, height: 3.148 },
+    'TROPICAL':                  { top: 19.167, left: 65.104, width: 11.198, height: 3.148 },
+    'FIRE OF GOD':               { top: 24.074, left: 65.104, width: 11.198, height: 3.148 },
+    'MELA SOUR':                 { top: 28.981, left: 65.104, width: 11.198, height: 3.148 },
 
-    // LES RESINES (colonne droite, bas)
-    'DOUBLE ZERO':        { top: row(457), left: COL_R, width: COL_W, height: ROW_H },
-    'MOUSSE CALI I.A.':   { top: row(507), left: COL_R, width: COL_W, height: ROW_H },
-    'NEW AFGHAN V3':      { top: row(554), left: COL_R, width: COL_W, height: ROW_H },
-    'X3 FILTRE 120U':     { top: row(602), left: COL_R, width: COL_W, height: ROW_H },
-    'ATOMIQUE':           { top: row(651), left: COL_R, width: COL_W, height: ROW_H },
-    'OUNAS EDDIN CALIPO': { top: row(699), left: COL_R, width: COL_W, height: ROW_H },
-    'BAB BERRED':         { top: row(746), left: COL_R, width: COL_W, height: ROW_H },
-    'DRY SIFT by LLDB':   { top: row(794), left: COL_R, width: COL_W, height: ROW_H },
-    'ICE O LATOR':        { top: row(842), left: COL_R, width: COL_W, height: ROW_H },
-    'FROZEN PAPAYA OU OG KUSH': { top: row(890), left: COL_R, width: COL_W, height: ROW_H }
+    // LES RESINES
+    'DOUBLE ZERO':               { top: 43.148, left: 65.104, width: 11.198, height: 3.148 },
+    'MOUSSE CALI I.A.':          { top: 48.056, left: 65.104, width: 11.198, height: 3.148 },
+    'NEW AFGHAN V3':             { top: 52.685, left: 65.104, width: 11.198, height: 3.148 },
+    'X3 FILTRE 120U':            { top: 57.315, left: 65.104, width: 11.198, height: 3.148 },
+    'ATOMIQUE':                  { top: 61.898, left: 65.104, width: 11.198, height: 3.148 },
+    'OUNAS EDDIN CALIPO':        { top: 66.528, left: 65.104, width: 11.198, height: 3.148 },
+    'BAB BERRED':                { top: 71.111, left: 65.104, width: 11.198, height: 3.148 },
+    'DRY SIFT by LLDB':          { top: 75.787, left: 65.104, width: 11.198, height: 3.148 },
+    'ICE O LATOR':               { top: 80.370, left: 65.104, width: 11.198, height: 3.148 },
+    'FROZEN PAPAYA OU OG KUSH':  { top: 85.556, left: 65.104, width: 11.198, height: 3.889 }
   };
 
   // Détection boutique (DOIT être fait AVANT de sélectionner PRODUCT_POSITIONS)
