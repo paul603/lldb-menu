@@ -5,9 +5,9 @@ URL de production : https://lldb-menu.vercel.app
 
 ## Fichiers
 - `index.html` — pages vidéo actuelles des TV : `/republique`, `/odeon`, `/asnieres`, `/nantes`.
-  Lit les .mp4 du dossier `/videos/` : `menu-<boutique>.mp4`. Vérifie les mises à jour toutes les 3 min.
+  Lit les .mp4 du bucket Supabase Storage `menu-tv` : `menu-<boutique>.mp4`. Vérifie les mises à jour toutes les 3 min.
   Options d'URL : `?fit=contain`, `?rot=90` / `?rot=270` (TV en portrait), plein écran sur OK/Entrée.
-- `videos/` — templates vidéo :
+- `videos/` — templates vidéo (local, à uploader sur Supabase - voir `UPLOAD_VIDEOS.md`) :
   - `menu-republique.mp4` (portrait) - "MENU 2026 (1).mp4"
   - `menu-asnieres.mp4`, `menu-odeon.mp4`, `menu-nantes.mp4` (paysage) - "Copie de MENU 2026 (2).mp4"
 - `v2.html` — menu connecté (HTML) : `/v2/republique`, etc.
